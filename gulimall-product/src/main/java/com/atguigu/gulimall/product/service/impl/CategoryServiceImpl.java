@@ -1,18 +1,23 @@
 package com.atguigu.gulimall.product.service.impl;
 
-import org.springframework.stereotype.Service;
-import java.util.Map;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.common.utils.Query;
-
 import com.atguigu.gulimall.product.dao.CategoryDao;
 import com.atguigu.gulimall.product.entity.CategoryEntity;
 import com.atguigu.gulimall.product.service.CategoryService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
+/**
+ * @author lzx
+ */
 @Service("categoryService")
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
 
@@ -26,4 +31,45 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return new PageUtils(page);
     }
 
+    /**
+     * 1、查出所有分类，并以树形解构输出
+     * @return 分类列表
+     */
+    @Override
+    public List<CategoryEntity> getListTree() {
+        // 1、查出所有分类
+        List<CategoryEntity> categoryEntityList = baseMapper.selectList(null);
+        // 2、组装成树状结构
+        // 2.1、查出一级分类
+        List<CategoryEntity> levelOneMenus = categoryEntityList.stream().filter((categoryEntity) -> {
+            return categoryEntity.getParentCid() == 0;
+        }).map((Menus)->{
+            Menus.setChildren(getChildren(Menus, categoryEntityList));
+            return Menus;
+        }).sorted((MenusBefore,MenusAfter)->{
+            return (MenusBefore.getSort()==null?0:MenusBefore.getSort()) - (MenusAfter.getSort()==null?0:MenusAfter.getSort());
+        }).collect(Collectors.toList());
+        return levelOneMenus;
+    }
+
+    /**
+     * 递归方法：获取某个菜单下的子菜单
+     * @param root 当前菜单
+     * @param all 从所有菜单中获取
+     * @return
+     */
+    private List<CategoryEntity> getChildren(CategoryEntity root,List<CategoryEntity> all){
+        List<CategoryEntity> children = all.stream().filter((categoryEntity) -> {
+            // 当前菜单父ID等于所有菜单中的分类ID
+            return categoryEntity.getParentCid().equals(root.getCatId());
+        }).map((categoryEntity)->{
+            // 递归查找子菜单
+            categoryEntity.setChildren(getChildren(categoryEntity, all));
+            return categoryEntity;
+        }).sorted((MenusBefore,MenusAfter)->{
+            //排序规则；解决空指针异常，判断是否为空，是返回0，不是返回自己的值
+            return (MenusBefore.getSort()==null?0:MenusBefore.getSort()) - (MenusAfter.getSort()==null?0:MenusAfter.getSort());
+        }).collect(Collectors.toList());
+        return children;
+    }
 }
