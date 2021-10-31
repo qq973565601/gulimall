@@ -40,17 +40,17 @@ public class CategoryController {
 
 
     /**
-     * 信息
+     * 5、回显信息，考虑并发请求
      */
     @RequestMapping("/info/{catId}")
     public R info(@PathVariable("catId") Long catId){
 		CategoryEntity category = categoryService.getById(catId);
 
-        return R.ok().put("category", category);
+        return R.ok().put("data", category);
     }
 
     /**
-     * 保存
+     * 3、保存
      */
     @RequestMapping("/save")
     public R save(@RequestBody CategoryEntity category){
@@ -60,7 +60,7 @@ public class CategoryController {
     }
 
     /**
-     * 修改
+     * 4、修改
      */
     @RequestMapping("/update")
     public R update(@RequestBody CategoryEntity category){
@@ -70,11 +70,15 @@ public class CategoryController {
     }
 
     /**
-     * 删除
+     * 2、删除
+     * RequestBody：获取到请求体里的内容（只有POST请求才有请求体）
+     * SpringMVC会将请求体的数据（json）转为对应的对象
      */
     @RequestMapping("/delete")
     public R delete(@RequestBody Long[] catIds){
-		categoryService.removeByIds(Arrays.asList(catIds));
+		//categoryService.removeByIds(Arrays.asList(catIds));
+
+		categoryService.removeMenuByIds(Arrays.asList(catIds));
 
         return R.ok();
     }
