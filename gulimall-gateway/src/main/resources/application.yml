@@ -1,6 +1,6 @@
 spring:
   cloud:
-#    定义路由规则
+    # 定义路由规则
     gateway:
       routes:
         - id: test_route
@@ -13,23 +13,40 @@ spring:
           predicates:
             - Query=url,qq
 
-#       定义商品路由规则(精确路由要放置高优先级位置)
-#       错误：http://localhost:88/api/product/category/list/tree
+#==================================路由顺序===================================
+
+        # 定义商品路由规则(精确路由要放置高优先级位置)
+
+#==================================配置商品路由服务============================
+
+        # 错误：http://localhost:88/api/product/category/list/tree
         - id: product_route
           uri: lb://gulimall-product
-#         断言，满足条件时转向uri
+          # 断言，满足条件时转向uri
           predicates:
             - Path=/api/product/**
-#         过滤，重写路径
+          # 过滤，重写路径
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
 
+#===============================配置第三方引入路由==============================
+
+        - id: third_party_route
+          # 所有第三方服务负载均衡到此服务
+          uri: lb://gulimall-third-party
+          # 断言：以此为前缀的所有请求路由给第三方服务
+          predicates:
+            - Path=/api/thirdparty/**
+          filters:
+            - RewritePath=/api/thirdparty(?<segment>.*),/$\{segment}
+
+#==============================配置前端路由====================================
         - id: admin_route
           uri: lb://renren-fast
-#         断言，满足条件时转向uri
+          # 断言，满足条件时转向uri
           predicates:
             - Path=/api/**
-#         过滤，重写路径
+          # 过滤，重写路径
           filters:
             - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
 
