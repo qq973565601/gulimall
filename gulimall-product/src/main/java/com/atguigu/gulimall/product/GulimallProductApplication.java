@@ -20,9 +20,18 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  *      2）、开启校验功能，在需要校验的 Bean 上添加注解 @Valid
  *          效果：校验错误以后会有默认的响应
  *      3）、校验的 Bean 后加上 BindingResult，可以获得校验的结果
- *
+ *      4）、分组校验（多场景的复杂校验）
+ *          (1)、给校验注解标注什么情况需要进行校验；
+ *          (2)、@Validated({AddGroup.class})
+ *          (3)默认没有指定分组的校验注解@NotBlank，在分组校验情况 Validated({AddGroup.class})下不生效，只会在@Validated生效；
+ *      5）、自定义校验
+ *          (1)、编写一个自定义的校验注解
+ *          (2)、编写一个自定义的校验器 ConstraintValidator
+ *          (3)、关联自定义的校验器和自定义的校验注解
  * 4、通一异常处理
  *      1）、使用 SpringMvc 提供的 @ControllerAdvice
+ *      2）、使用 @ExceptionHandler 标注要处理的异常
+ *      3）、使用枚举统一状态码
  */
 
 

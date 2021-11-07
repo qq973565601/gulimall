@@ -49,6 +49,7 @@ public class GulimallExceptionAdvice {
     @ExceptionHandler(value = Throwable.class)
     public R handleException(Throwable throwable){
 
+        log.error("出现的错误为:",throwable);
         return R.error(BizCodeEnum.UNKNOWN_EXCPTION.getCode(),BizCodeEnum.UNKNOWN_EXCPTION.getMsg());
     }
 
