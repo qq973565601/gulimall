@@ -1,8 +1,8 @@
 package com.atguigu.gulimall.product.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.gulimall.product.entity.CategoryEntity;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 import java.util.Map;
@@ -16,12 +16,28 @@ import java.util.Map;
  */
 public interface CategoryService extends IService<CategoryEntity> {
 
+    /**
+     * @param params
+     * @return
+     */
     PageUtils queryPage(Map<String, Object> params);
 
-  /**
-   * @return
-   * */
-  List<CategoryEntity> getListTree();
+    /**
+     * @return
+     * */
+    List<CategoryEntity> getListTree();
+
+    /**
+     * @param asList
+     */
     void removeMenuByIds(List<Long> asList);
+
+    /**
+     * 找到 cateLogId 的完整路径
+     * 路径格式 id：[父，当前、子]
+     * @param cateLogId 当前id
+     * @return 数组存储完整路径
+     */
+    Long[] findCateLogPath(Long cateLogId);
 }
 

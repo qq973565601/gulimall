@@ -14,8 +14,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 分页工具类
- *
+ * 封装的分页工具类，自动查询出分页信息
  * @author Mark sunlightcs@gmail.com
  */
 public class PageUtils implements Serializable {

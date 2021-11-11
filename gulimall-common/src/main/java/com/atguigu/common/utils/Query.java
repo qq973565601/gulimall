@@ -23,15 +23,28 @@ import java.util.Map;
  */
 public class Query<T> {
 
+    /**
+     * @param params：前端传入的 map
+     * @return 分页信息
+     */
     public IPage<T> getPage(Map<String, Object> params) {
         return this.getPage(params, null, false);
     }
 
+    /**
+     * 从 map中提取各个变量的值
+     * @param params：前端传入的 map
+     * @param defaultOrderField
+     * @param isAsc
+     * @return 分页信息
+     */
     public IPage<T> getPage(Map<String, Object> params, String defaultOrderField, boolean isAsc) {
         //分页参数
-        long curPage = 1;
-        long limit = 10;
+        long curPage = 1L;
+        long limit = 10L;
 
+
+        // TODO: 为什么这里不能用 equals
         if(params.get(Constant.PAGE) != null){
             curPage = Long.parseLong((String)params.get(Constant.PAGE));
         }

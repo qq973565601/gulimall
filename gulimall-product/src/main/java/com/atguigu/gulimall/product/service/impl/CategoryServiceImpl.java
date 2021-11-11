@@ -10,6 +10,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,19 +55,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     }
 
     /**
-     * 2、删除功能
-     * @param asList
-     */
-    @Override
-    public void removeMenuByIds(List<Long> asList) {
-        //TODO 查出被关联的菜单
-
-        //逻辑删除
-        baseMapper.deleteBatchIds(asList);
-    }
-
-    /**
-     * 1、递归方法：获取某个菜单下的子菜单
+     * 递归方法：获取某个菜单下的子菜单
      * @param root 当前菜单
      * @param all 从所有菜单中获取
      * @return
@@ -83,5 +73,47 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
             return (MenusBefore.getSort()==null?0:MenusBefore.getSort()) - (MenusAfter.getSort()==null?0:MenusAfter.getSort());
         }).collect(Collectors.toList());
         return children;
+    }
+
+    /**
+     * 2、删除功能
+     * @param asList
+     */
+    @Override
+    public void removeMenuByIds(List<Long> asList) {
+        //TODO 查出被关联的菜单
+
+        //逻辑删除
+        baseMapper.deleteBatchIds(asList);
+    }
+
+    /**
+     * 属性分组模块：回显三级分类的所有路径 id
+     * 查询回调的属性 id 的完整路径
+     * @param cateLogId 当前id
+     * @return id路径
+     */
+    @Override
+    public Long[] findCateLogPath(Long cateLogId) {
+        List<Long> paths = new ArrayList<>();
+        CategoryEntity byId = this.getById(cateLogId);
+        List<Long> parentPath = findParentPath(cateLogId, paths);
+        Collections.reverse(parentPath);
+        return parentPath.toArray(new Long[parentPath.size()]);
+    }
+
+    /**
+     * 递归查询父 id
+     * @param cateLogId
+     * @param paths
+     * @return
+     */
+    private List<Long> findParentPath(Long cateLogId, List<Long> paths) {
+        paths.add(cateLogId);
+        CategoryEntity byId = this.getById(cateLogId);
+        if(byId.getParentCid() != 0 ){
+            findParentPath(byId.getParentCid(),paths);
+        }
+        return paths;
     }
 }
