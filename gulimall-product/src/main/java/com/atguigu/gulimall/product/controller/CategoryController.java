@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * 商品三级分类
+ * 对应表：pms_category
  *
  * @author linzongxing
  * @email 973565601@qq.com
@@ -61,10 +62,12 @@ public class CategoryController {
 
     /**
      * 4、修改
+     * 同步更有关联关系的表
      */
     @RequestMapping("/update")
     public R update(@RequestBody CategoryEntity category){
-		categoryService.updateById(category);
+		//categoryService.updateById(category);
+		categoryService.updateDetail(category);
 
         return R.ok();
     }

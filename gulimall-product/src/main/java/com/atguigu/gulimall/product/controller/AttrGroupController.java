@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * 属性分组
- *
+ * 对应表：pms_attr_group
  * @author linzongxing
  * @email 973565601@qq.com
  * @date 2021-10-08 22:28:15
