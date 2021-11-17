@@ -34,7 +34,7 @@ public class CategoryBrandRelationController {
     @RequestMapping(value = "/catelog/list",method = RequestMethod.GET)
     public R catelogList(@RequestParam("brandId") Long brandId){
         // 构建查询条件
-        QueryWrapper<CategoryBrandRelationEntity> wrapper = new QueryWrapper<CategoryBrandRelationEntity>().eq("brandId", brandId);
+        QueryWrapper<CategoryBrandRelationEntity> wrapper = new QueryWrapper<CategoryBrandRelationEntity>().eq("brand_id", brandId);
 
         List<CategoryBrandRelationEntity> data = categoryBrandRelationService.list(wrapper);
 
