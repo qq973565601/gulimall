@@ -18,7 +18,9 @@ import java.util.Map;
 
 /**
  * 品牌管理
+ * 对应页面：品牌管理
  * 表：pms_brand
+ *
  * @author linzongxing
  * @email 973565601@qq.com
  * @date 2021-10-08 22:28:15

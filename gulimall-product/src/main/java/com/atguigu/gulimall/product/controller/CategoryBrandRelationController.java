@@ -16,6 +16,7 @@ import java.util.Map;
 
 /**
  * 品牌分类关联
+ * 对应页面：品牌管理
  * 表：pms_category_brand_relation
  *
  * @author linzongxing

@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * 商品三级分类
+ * 对应页面：分类维护
  * 对应表：pms_category
  *
  * @author linzongxing
