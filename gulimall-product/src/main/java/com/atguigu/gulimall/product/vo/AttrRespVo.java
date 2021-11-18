@@ -1,6 +1,5 @@
 package com.atguigu.gulimall.product.vo;
 
-import com.atguigu.gulimall.product.entity.AttrEntity;
 import lombok.Data;
 
 /**
@@ -9,8 +8,10 @@ import lombok.Data;
  * @author lzx
  */
 @Data
-public class AttrRespVo extends AttrEntity {
+public class AttrRespVo extends AttrVo {
 
     private String catelogName;
     private String groupName;
+
+    private Long[] catelogPath;
 }

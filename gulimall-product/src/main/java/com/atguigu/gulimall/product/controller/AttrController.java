@@ -2,8 +2,8 @@ package com.atguigu.gulimall.product.controller;
 
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.common.utils.R;
-import com.atguigu.gulimall.product.entity.AttrEntity;
 import com.atguigu.gulimall.product.service.AttrService;
+import com.atguigu.gulimall.product.vo.AttrRespVo;
 import com.atguigu.gulimall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,12 +30,14 @@ public class AttrController {
 
 
     /**
-     * 1、分页查询
+     * 1、分页查询，并列表显示
+     * 添加 key 条件，用于模糊查询
      */
-    @GetMapping("/base/list/{catelogId}")
+    @GetMapping("/{attrType}/list/{catelogId}")
     public R baseAttrList(@RequestParam Map<String, Object> params,
-                          @PathVariable("catelogId") Long catelogId){
-        PageUtils page = attrService.queryBasePage(params,catelogId);
+                          @PathVariable("catelogId") Long catelogId,
+                          @PathVariable("attrType") String type){
+        PageUtils page = attrService.queryBasePage(params,catelogId,type);
 
         return R.ok().put("page", page);
     }
@@ -51,13 +53,16 @@ public class AttrController {
     }
 
     /**
+     * 根据前端参数进行信息回显
      * 信息
      */
     @RequestMapping("/info/{attrId}")
     public R info(@PathVariable("attrId") Long attrId){
-		AttrEntity attr = attrService.getById(attrId);
+		// AttrEntity attr = attrService.getById(attrId);
 
-        return R.ok().put("attr", attr);
+        AttrRespVo attrRespVo = attrService.getAttrInfo(attrId);
+
+        return R.ok().put("attr", attrRespVo);
     }
 
     /**
@@ -75,8 +80,9 @@ public class AttrController {
      * 修改
      */
     @RequestMapping("/update")
-    public R update(@RequestBody AttrEntity attr){
-		attrService.updateById(attr);
+    public R update(@RequestBody AttrVo attr){
+		//attrService.updateById(attr);
+        attrService.updateAttr(attr);
 
         return R.ok();
     }

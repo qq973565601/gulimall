@@ -1,5 +1,6 @@
 package com.atguigu.gulimall.product.service.impl;
 
+import com.atguigu.common.constant.ProductConstant;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.common.utils.Query;
 import com.atguigu.gulimall.product.dao.AttrAttrgroupRelationDao;
@@ -11,9 +12,11 @@ import com.atguigu.gulimall.product.entity.AttrEntity;
 import com.atguigu.gulimall.product.entity.AttrGroupEntity;
 import com.atguigu.gulimall.product.entity.CategoryEntity;
 import com.atguigu.gulimall.product.service.AttrService;
+import com.atguigu.gulimall.product.service.CategoryService;
 import com.atguigu.gulimall.product.vo.AttrRespVo;
 import com.atguigu.gulimall.product.vo.AttrVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
@@ -42,6 +45,9 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     @Autowired
     CategoryDao categoryDao;
 
+    @Autowired
+    CategoryService categoryService;
+
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<AttrEntity> page = this.page(
@@ -66,22 +72,30 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         // 1、保存基本数据
         this.save(attrEntity);
         // 2、保存关联关系(pms_attr_attrgroup_relation)
-        AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
-        relationEntity.setAttrGroupId(attr.getAttrGroupId());
-        relationEntity.setAttrId(attrEntity.getAttrId());
-        // 使用 dao 保存关联关系进数据库
-        relationDao.insert(relationEntity);
+        if (attr.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode() && attr.getAttrGroupId()!=null) {
+            AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
+            relationEntity.setAttrGroupId(attr.getAttrGroupId());
+            relationEntity.setAttrId(attrEntity.getAttrId());
+            // 使用 dao 保存关联关系进数据库
+            relationDao.insert(relationEntity);
+        }
     }
 
    /**
-   * @param params
-   * @param catelogId
-   * @return
+    * 2、分页查询，并列表显示
+   * @param params ：页面封装数据
+   * @param catelogId ：
+   * @param type
+    * @return 实体类 respVos，封装到分页数据里
    */
     @Override
-    public PageUtils queryBasePage(Map<String, Object> params, Long catelogId) {
+    public PageUtils queryBasePage(Map<String, Object> params, Long catelogId, String type) {
         // 创建复杂查询条件
-        QueryWrapper<AttrEntity> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<AttrEntity> queryWrapper = new QueryWrapper<AttrEntity>()
+                        .eq("attr_type","base"
+                        .equalsIgnoreCase(type)?ProductConstant
+                        .AttrEnum.ATTR_TYPE_BASE
+                        .getCode():ProductConstant.AttrEnum.ATTR_TYPE_SALE.getCode());
         if(catelogId != 0) {
             queryWrapper.eq("catelog_id",catelogId);
         }
@@ -102,15 +116,15 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         List<AttrRespVo> respVos = records.stream().map((AttrEntity) -> {
             AttrRespVo attrRespVo = new AttrRespVo();
             BeanUtils.copyProperties(AttrEntity, attrRespVo);
-
             // 设置分组和分类的名字
-            AttrAttrgroupRelationEntity attr_id = relationDao.selectOne(
+            if ("base".equalsIgnoreCase(type)){
+                AttrAttrgroupRelationEntity attr_id = relationDao.selectOne(
                     new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", AttrEntity.getAttrId()));
-            if (attr_id != null) {
-                AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attr_id.getAttrGroupId());
-                attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
+                if (attr_id != null) {
+                    AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attr_id.getAttrGroupId());
+                    attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
+                }
             }
-
             CategoryEntity categoryEntity = categoryDao.selectById(AttrEntity.getCatelogId());
             if (categoryEntity != null) {
                 attrRespVo.setCatelogName(categoryEntity.getName());
@@ -121,6 +135,71 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         pageUtils.setList(respVos);
         return pageUtils;
 
+    }
+
+    /**
+     * 3、信息回显
+     *
+     * @param attrId
+     * @return
+     */
+    @Override
+    public AttrRespVo getAttrInfo(Long attrId) {
+        AttrRespVo attrRespVo = new AttrRespVo();
+        AttrEntity attrEntity = this.getById(attrId);
+        BeanUtils.copyProperties(attrEntity,attrRespVo);
+
+        // 通过关联关系表设置分组信息
+        if(attrEntity.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode()){
+            QueryWrapper<AttrAttrgroupRelationEntity> queryWrapper = new QueryWrapper<>();
+            QueryWrapper<AttrAttrgroupRelationEntity> attr_id = queryWrapper.eq("attr_id", attrId);
+            AttrAttrgroupRelationEntity attrGroupRelation = relationDao.selectOne(attr_id);
+            if (attrGroupRelation != null){
+                attrRespVo.setAttrGroupId(attrGroupRelation.getAttrGroupId());
+                AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrGroupRelation.getAttrGroupId());
+                if (attrGroupEntity != null){
+                    attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
+                }
+            }
+        }
+
+        // 设置分类信息
+        Long catelogId = attrEntity.getCatelogId();
+        Long[] cateLogPath = categoryService.findCateLogPath(catelogId);
+        attrRespVo.setCatelogPath(cateLogPath);
+        CategoryEntity categoryEntity = categoryDao.selectById(catelogId);
+        if (categoryEntity != null){
+            attrRespVo.setCatelogName(categoryEntity.getName());
+        }
+
+        return attrRespVo;
+    }
+
+    /**
+     * 4、更新数据
+     *
+     * @param attr: web date
+     */
+    @Transactional
+    @Override
+    public void updateAttr(AttrVo attr) {
+        AttrEntity attrEntity = new AttrEntity();
+        BeanUtils.copyProperties(attr,attrEntity);
+        this.updateById(attrEntity);
+
+        // 修改关联分组
+        if(attrEntity.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode()){
+            AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
+            relationEntity.setAttrId(attr.getAttrId());
+            relationEntity.setAttrGroupId(attr.getAttrGroupId());
+
+            Integer count = relationDao.selectCount(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attr.getAttrId()));
+            if (count>0){
+                relationDao.update(relationEntity,new UpdateWrapper<AttrAttrgroupRelationEntity>().eq("attr_id",attr.getAttrId()));
+            }else {
+                relationDao.insert(relationEntity);
+            }
+        }
     }
 
 }
