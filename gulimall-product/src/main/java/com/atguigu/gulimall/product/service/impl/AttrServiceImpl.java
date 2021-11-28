@@ -13,6 +13,7 @@ import com.atguigu.gulimall.product.entity.AttrGroupEntity;
 import com.atguigu.gulimall.product.entity.CategoryEntity;
 import com.atguigu.gulimall.product.service.AttrService;
 import com.atguigu.gulimall.product.service.CategoryService;
+import com.atguigu.gulimall.product.vo.AttrGroupRelationVo;
 import com.atguigu.gulimall.product.vo.AttrRespVo;
 import com.atguigu.gulimall.product.vo.AttrVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -200,6 +203,56 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
                 relationDao.insert(relationEntity);
             }
         }
+    }
+
+    /**
+     * 5、根据分组 id，获取组内关联的所有属性
+     * @return
+     */
+    @Override
+    public List<AttrEntity> getRelationAttr(Long attrgroupId) {
+        QueryWrapper<AttrAttrgroupRelationEntity> wrapper = new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_group_id",attrgroupId);
+        List<AttrAttrgroupRelationEntity> entities = relationDao.selectList(wrapper);
+
+        List<Long> attrIds = entities.stream().map((attr) -> {
+            return attr.getAttrId();
+        }).collect(Collectors.toList());
+        if (attrIds == null || attrIds.size() == 0){
+            return null;
+        }
+        Collection<AttrEntity> attrEntities = this.listByIds(attrIds);
+        return (List<AttrEntity>) attrEntities;
+    }
+
+    /**
+     * 6、删除分组与规格的关联关系
+     * 在 AttrGroupController
+     * @param vos：封装的实体类
+     */
+    @Override
+    public void deleteRelation(AttrGroupRelationVo[] vos) {
+
+        List<AttrAttrgroupRelationEntity> collect = Arrays.asList(vos).stream().map((item) -> {
+            AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
+            BeanUtils.copyProperties(item, relationEntity);
+            return relationEntity;
+        }).collect(Collectors.toList());
+
+        relationDao.deleteBatchRelation(collect);
+    }
+
+    /**
+     * 7、获取当前分组没有关联的分组属性
+     * @param attrgroupId：获取路径变量
+     * @param params：收集页面带来的分页参数
+     * @return 分页信息
+     */
+    @Override
+    public PageUtils getNoRelationAttr(Long attrgroupId, Map<String, Object> params) {
+        // 1、当前分组只能关联自己所属的分类里面的所有属性
+
+        // 2、当前分组只能关联别的分组没有引用的属性
+        return null;
     }
 
 }

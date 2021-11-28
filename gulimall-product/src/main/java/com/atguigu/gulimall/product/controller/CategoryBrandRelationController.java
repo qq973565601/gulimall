@@ -20,6 +20,7 @@ import java.util.Map;
  * 表：pms_category_brand_relation
  *
  * @author linzongxing
+ *
  * @email 973565601@qq.com
  * @date 2021-10-08 22:28:15
  */
@@ -35,7 +36,8 @@ public class CategoryBrandRelationController {
     @RequestMapping(value = "/catelog/list",method = RequestMethod.GET)
     public R catelogList(@RequestParam("brandId") Long brandId){
         // 构建查询条件
-        QueryWrapper<CategoryBrandRelationEntity> wrapper = new QueryWrapper<CategoryBrandRelationEntity>().eq("brand_id", brandId);
+        QueryWrapper<CategoryBrandRelationEntity> wrapper = new QueryWrapper<CategoryBrandRelationEntity>()
+                .eq("brand_id", brandId);
 
         List<CategoryBrandRelationEntity> data = categoryBrandRelationService.list(wrapper);
 
