@@ -2,22 +2,25 @@ package com.atguigu.gulimall.product.controller;
 
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.common.utils.R;
+import com.atguigu.gulimall.product.entity.AttrEntity;
 import com.atguigu.gulimall.product.entity.AttrGroupEntity;
 import com.atguigu.gulimall.product.service.AttrGroupService;
+import com.atguigu.gulimall.product.service.AttrService;
 import com.atguigu.gulimall.product.service.CategoryService;
+import com.atguigu.gulimall.product.vo.AttrGroupRelationVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-
-
 
 /**
  * 属性分组
+ * 对应页面：属性分组
+ * 对应表：pms_attr_group
  *
  * @author linzongxing
- * @email 973565601@qq.com
  * @date 2021-10-08 22:28:15
  */
 @RestController
@@ -29,8 +32,46 @@ public class AttrGroupController {
     @Autowired
     CategoryService categoryService;
 
+    @Autowired
+    AttrService attrService;
+
+
     /**
-     * 列表
+     * 4、删除分组和规格之间的关联关系
+     * @param vos：页面传入并封装的实体类
+     * @return ：删除
+     */
+    @PostMapping("/attr/relation/delete")
+    public R deleteRelation(@RequestBody AttrGroupRelationVo[] vos){
+        attrService.deleteRelation(vos);
+        return R.ok();
+    }
+
+    /**
+     * 3、根据分组 id ，获取属性分组的关联的所有属性
+     */
+    @GetMapping("/{attrgroupId}/attr/relation")
+    public R attrRelation(@PathVariable("attrgroupId") Long attrgroupId){
+        List<AttrEntity> entities = attrService.getRelationAttr(attrgroupId);
+        return R.ok().put("data",entities);
+    }
+
+    /**
+     * 5、根据分组 id ，获取属性分组没有关联的所有属性
+     * attrgroupId：获取路径变量
+     * params：收集页面带来的分页参数
+     * /product/attrgroup/{attrgroupId}/noattr/relation
+     */
+    @GetMapping("/{attrgroupId}/noattr/relation")
+    public R attrNoRelation(@PathVariable("attrgroupId") Long attrgroupId,
+                            @RequestParam Map<String, Object> params){
+        // 获取分页数据
+        PageUtils pageUtils = attrService.getNoRelationAttr(attrgroupId,params);
+        return R.ok().put("page",pageUtils);
+    }
+
+    /**
+     * 1、列表
      * 携带三级分类 id -> catelogId ，从路径中获取
      */
     @RequestMapping("/list/{catelogId}")
@@ -43,7 +84,7 @@ public class AttrGroupController {
 
 
     /**
-     * 属性分组：根据id回调查询信息
+     * 2、属性分组：根据id回调查询信息
      * 信息
      */
     @RequestMapping("/info/{attrGroupId}")
@@ -63,7 +104,6 @@ public class AttrGroupController {
      * 保存
      */
     @RequestMapping("/save")
-    //@RequiresPermissions("product:attrgroup:save")
     public R save(@RequestBody AttrGroupEntity attrGroup){
 		attrGroupService.save(attrGroup);
 

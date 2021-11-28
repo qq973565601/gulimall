@@ -1,24 +1,22 @@
 package com.atguigu.gulimall.product.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.atguigu.gulimall.product.entity.AttrEntity;
-import com.atguigu.gulimall.product.service.AttrService;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.common.utils.R;
+import com.atguigu.gulimall.product.service.AttrService;
+import com.atguigu.gulimall.product.vo.AttrRespVo;
+import com.atguigu.gulimall.product.vo.AttrVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.Map;
 
 
 
 /**
  * 商品属性
+ * 对应页面：规格参数
+ * 对应表：pms_attr
  *
  * @author linzongxing
  * @email 973565601@qq.com
@@ -30,36 +28,50 @@ public class AttrController {
     @Autowired
     private AttrService attrService;
 
+
+    /**
+     * 1、分页查询，并列表显示
+     * 添加 key 条件，用于模糊查询
+     */
+    @GetMapping("/{attrType}/list/{catelogId}")
+    public R baseAttrList(@RequestParam Map<String, Object> params,
+                          @PathVariable("catelogId") Long catelogId,
+                          @PathVariable("attrType") String type){
+        PageUtils page = attrService.queryBasePage(params,catelogId,type);
+
+        return R.ok().put("page", page);
+    }
+
     /**
      * 列表
      */
     @RequestMapping("/list")
-    //@RequiresPermissions("product:attr:list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = attrService.queryPage(params);
 
         return R.ok().put("page", page);
     }
 
-
     /**
+     * 根据前端参数进行信息回显
      * 信息
      */
     @RequestMapping("/info/{attrId}")
-    //@RequiresPermissions("product:attr:info")
     public R info(@PathVariable("attrId") Long attrId){
-		AttrEntity attr = attrService.getById(attrId);
+		// AttrEntity attr = attrService.getById(attrId);
 
-        return R.ok().put("attr", attr);
+        AttrRespVo attrRespVo = attrService.getAttrInfo(attrId);
+
+        return R.ok().put("attr", attrRespVo);
     }
 
     /**
      * 保存
      */
     @RequestMapping("/save")
-    //@RequiresPermissions("product:attr:save")
-    public R save(@RequestBody AttrEntity attr){
-		attrService.save(attr);
+    public R save(@RequestBody AttrVo attr){
+        // 自定义，保存更多多的 attrGroupId
+		attrService.saveAttr(attr);
 
         return R.ok();
     }
@@ -68,9 +80,9 @@ public class AttrController {
      * 修改
      */
     @RequestMapping("/update")
-    //@RequiresPermissions("product:attr:update")
-    public R update(@RequestBody AttrEntity attr){
-		attrService.updateById(attr);
+    public R update(@RequestBody AttrVo attr){
+		//attrService.updateById(attr);
+        attrService.updateAttr(attr);
 
         return R.ok();
     }
@@ -79,7 +91,6 @@ public class AttrController {
      * 删除
      */
     @RequestMapping("/delete")
-    //@RequiresPermissions("product:attr:delete")
     public R delete(@RequestBody Long[] attrIds){
 		attrService.removeByIds(Arrays.asList(attrIds));
 

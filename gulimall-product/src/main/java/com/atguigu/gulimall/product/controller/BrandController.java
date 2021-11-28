@@ -17,7 +17,9 @@ import java.util.Map;
 
 
 /**
- * 品牌
+ * 品牌管理
+ * 对应页面：品牌管理
+ * 表：pms_brand
  *
  * @author linzongxing
  * @email 973565601@qq.com
@@ -72,11 +74,13 @@ public class BrandController {
     }
 
     /**
-     * 修改
+     * 当品牌表发生变化时，因为关联关系表定义了name，所以要同步更新
+     * 冗余存储，同步更新数据
      */
     @RequestMapping("/update")
     public R update(@Validated(UpdateVaild.class) @RequestBody BrandEntity brand) {
-		brandService.updateById(brand);
+		//brandService.updateById(brand);
+        brandService.updateDetail(brand);
 
         return R.ok();
     }
