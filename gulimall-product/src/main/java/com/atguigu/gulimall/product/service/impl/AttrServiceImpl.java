@@ -63,7 +63,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
 
     /**
      * 1、规格参数中 新增属性
-     *
+     *  保存关联关系
      * @param attr：前端页面获取的数据封装的实体类
      */
     @Transactional
@@ -121,10 +121,10 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             BeanUtils.copyProperties(AttrEntity, attrRespVo);
             // 设置分组和分类的名字
             if ("base".equalsIgnoreCase(type)){
-                AttrAttrgroupRelationEntity attr_id = relationDao.selectOne(
+                AttrAttrgroupRelationEntity attrId = relationDao.selectOne(
                     new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", AttrEntity.getAttrId()));
-                if (attr_id != null) {
-                    AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attr_id.getAttrGroupId());
+                if (attrId != null && attrId.getAttrGroupId() != null) {
+                    AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrId.getAttrGroupId());
                     attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
                 }
             }
