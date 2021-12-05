@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * @author lzx
+ */
 @Service("productAttrValueService")
 public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao, ProductAttrValueEntity> implements ProductAttrValueService {
 
