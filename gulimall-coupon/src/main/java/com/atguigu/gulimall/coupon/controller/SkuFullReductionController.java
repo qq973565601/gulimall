@@ -1,19 +1,15 @@
 package com.atguigu.gulimall.coupon.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.atguigu.gulimall.coupon.entity.SkuFullReductionEntity;
-import com.atguigu.gulimall.coupon.service.SkuFullReductionService;
+import com.atguigu.common.to.SkuReductionTo;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.common.utils.R;
+import com.atguigu.gulimall.coupon.entity.SkuFullReductionEntity;
+import com.atguigu.gulimall.coupon.service.SkuFullReductionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.Map;
 
 
 
@@ -29,6 +25,17 @@ import com.atguigu.common.utils.R;
 public class SkuFullReductionController {
     @Autowired
     private SkuFullReductionService skuFullReductionService;
+
+    /**
+     * 1、远程调用，只保存封装的满减信息
+     * @param reductionTo :封装的满减信息
+     */
+    @RequestMapping("/saveInfo")
+    public R saveInfo(@RequestBody SkuReductionTo reductionTo){
+		skuFullReductionService.saveSkuReduction(reductionTo);
+
+        return R.ok();
+    }
 
     /**
      * 列表
@@ -54,10 +61,10 @@ public class SkuFullReductionController {
     }
 
     /**
+     * 封装了满减和折扣
      * 保存
      */
     @RequestMapping("/save")
-    //@RequiresPermissions("coupon:skufullreduction:save")
     public R save(@RequestBody SkuFullReductionEntity skuFullReduction){
 		skuFullReductionService.save(skuFullReduction);
 

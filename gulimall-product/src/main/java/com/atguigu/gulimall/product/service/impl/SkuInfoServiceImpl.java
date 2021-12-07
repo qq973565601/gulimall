@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 
+/**
+ * @author lzx
+ */
 @Service("skuInfoService")
 public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> implements SkuInfoService {
 

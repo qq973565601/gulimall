@@ -1,9 +1,13 @@
 package com.atguigu.gulimall.product.service.impl;
 
+import com.atguigu.common.to.SkuReductionTo;
+import com.atguigu.common.to.SpuBoundTo;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.common.utils.Query;
+import com.atguigu.common.utils.R;
 import com.atguigu.gulimall.product.dao.SpuInfoDao;
 import com.atguigu.gulimall.product.entity.*;
+import com.atguigu.gulimall.product.feign.CouponFeignService;
 import com.atguigu.gulimall.product.service.*;
 import com.atguigu.gulimall.product.vo.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -12,7 +16,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +49,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Autowired
     SkuSaleAttrValueService skuSaleAttrValueService;
 
+    @Autowired
+    CouponFeignService couponFeignService;
+
     /**
      * @param params
      * @return
@@ -60,6 +69,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
      * 页面获取所有数据 vo，分别保存对应的表中
      * @param vo ：页面获取所有数据
      */
+    @Transactional
     @Override
     public void saveSpuInfo(SpuSaveVo vo) {
 
@@ -145,13 +155,29 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                  * 远程服务：
                  * gulimall_sms->sms_sku_ladder\sms_sku_full_reduction\sms_member_price
                  */
-                //todo
+                SkuReductionTo skuReductionTo = new SkuReductionTo();
+                BeanUtils.copyProperties(item, skuReductionTo);
+                // 缺少 skuId，需要添加
+                skuReductionTo.setSkuId(skuId);
+                if(skuReductionTo.getFullCount() >0 || skuReductionTo.getFullPrice().compareTo(new BigDecimal("0")) == 1){
+                    R r1 = couponFeignService.saveSkuReduction(skuReductionTo);
+                    if(r1.getCode() != 0){
+                        log.error("远程保存sku优惠信息失败");
+                    }
+                }
             });
         }
 
-
-
         // 6、保存spu的积分信息；gulimall_sms->sms_spu_bounds
+        Bounds bounds = vo.getBounds();
+        SpuBoundTo spuBoundTo = new SpuBoundTo();
+        BeanUtils.copyProperties(bounds, spuBoundTo);
+        spuBoundTo.setSpuId(infoEntity.getId());
+        R r = couponFeignService.saveSpuBounds(spuBoundTo);
+        // 打印是否调用成功
+        if(r.getCode() != 0){
+            log.error("远程保存spu积分信息失败");
+        }
     }
 
     @Override
