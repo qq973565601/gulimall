@@ -57,6 +57,7 @@ public class SkuFullReductionServiceImpl extends ServiceImpl<SkuFullReductionDao
         skuLadderEntity.setFullCount(reductionTo.getFullCount());
         skuLadderEntity.setDiscount(reductionTo.getDiscount());
         skuLadderEntity.setAddOther(reductionTo.getCountStatus());
+        // 过滤图片为空
         if(reductionTo.getFullCount() > 0){
             skuLadderService.save(skuLadderEntity);
         }
@@ -64,6 +65,7 @@ public class SkuFullReductionServiceImpl extends ServiceImpl<SkuFullReductionDao
         // 2、满减信息，sms_sku_full_reduction
         SkuFullReductionEntity reductionEntity = new SkuFullReductionEntity();
         BeanUtils.copyProperties(reductionTo,reductionEntity);
+        // 过滤数值为0
         if(reductionEntity.getFullPrice().compareTo(new BigDecimal("0"))==1){
             this.save(reductionEntity);
         }
@@ -80,6 +82,7 @@ public class SkuFullReductionServiceImpl extends ServiceImpl<SkuFullReductionDao
             priceEntity.setAddOther(1);
             return priceEntity;
         }).filter(item->{
+            // 过滤价格为0的
             return item.getMemberPrice().compareTo(new BigDecimal("0")) == 1;
         }).collect(Collectors.toList());
 
