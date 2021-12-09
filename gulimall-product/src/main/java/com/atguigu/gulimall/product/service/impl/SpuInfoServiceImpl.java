@@ -67,6 +67,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     /**
      * 1、新增商品
+     * TODO 保存失败时等一系列原因处理逻辑
      * 页面获取所有数据 vo，分别保存对应的表中
      * @param vo ：页面获取所有数据
      */
@@ -189,6 +190,49 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Override
     public void saveBaseSpuInfo(SpuInfoEntity spuInfoEntity) {
         this.baseMapper.insert(spuInfoEntity);
+    }
+
+    /**
+     * 2、spu检索
+     * 根据 spu_name、publish_status、brand_id、catalog_id 检索
+     * @param params 包含前端传入的检索条件
+     * @return 分页数据
+     */
+    @Override
+    public PageUtils queryPageByCondition(Map<String, Object> params) {
+        QueryWrapper<SpuInfoEntity> queryWrapper = new QueryWrapper<>();
+        String key = (String) params.get("key");
+        if (!StringUtils.isEmpty(key)){
+            queryWrapper.and((wrapper->{
+                wrapper.eq("id",key).like("spu_name", key);
+            }));
+        }
+
+        String status = (String) params.get("status");
+        if (StringUtils.isEmpty(status)){
+            queryWrapper.eq("publish_status",status);
+        }
+
+        String brandId = (String) params.get("brandId");
+        if(!StringUtils.isEmpty(brandId)&&!"0".equalsIgnoreCase(brandId)){
+            queryWrapper.eq("brand_id",brandId);
+        }
+
+        String catelogId = (String) params.get("catelogId");
+        if(!StringUtils.isEmpty(catelogId)&&!"0".equalsIgnoreCase(catelogId)){
+            queryWrapper.eq("catalog_id",catelogId);
+        }
+
+        /**
+         * status: 2
+         * key:
+         * brandId: 9
+         * catelogId: 225
+         */
+        IPage<SpuInfoEntity> infoEntityIPage = new Query<SpuInfoEntity>().getPage(params);
+        IPage<SpuInfoEntity> page = this.page(infoEntityIPage, queryWrapper);
+
+        return new PageUtils(page);
     }
 
 }
