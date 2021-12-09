@@ -204,7 +204,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         String key = (String) params.get("key");
         if (!StringUtils.isEmpty(key)){
             queryWrapper.and((wrapper->{
-                wrapper.eq("id",key).like("spu_name", key);
+                wrapper.eq("id",key).or().like("spu_name", key);
             }));
         }
 
