@@ -1,17 +1,21 @@
 spring:
   cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
     # 定义路由规则
     gateway:
       routes:
-        - id: test_route
-          uri: https://www.baidu.com
-          predicates:
-            - Query=url,baidu
 
-        - id: qq_route
-          uri: https://www.qq.com
-          predicates:
-            - Query=url,qq
+#==================================路由测试===================================
+#        - id: test_route
+#          uri: https://www.baidu.com
+#          predicates:
+#            - Query=url,baidu
+#        - id: qq_route
+#          uri: https://www.qq.com
+#          predicates:
+#            - Query=url,qq
 
 #==================================路由顺序===================================
 
@@ -46,6 +50,15 @@ spring:
           uri: lb://gulimall-member
           predicates:
             - Path=/api/member/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+#===============================配置库存系统路由==============================
+
+        - id: ware_route
+          uri: lb://gulimall-ware
+          predicates:
+            - Path=/api/ware/**
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
 

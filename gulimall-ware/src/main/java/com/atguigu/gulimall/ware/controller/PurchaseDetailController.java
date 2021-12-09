@@ -2,8 +2,8 @@ package com.atguigu.gulimall.ware.controller;
 
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.common.utils.R;
-import com.atguigu.gulimall.ware.entity.WareSkuEntity;
-import com.atguigu.gulimall.ware.service.WareSkuService;
+import com.atguigu.gulimall.ware.entity.PurchaseDetailEntity;
+import com.atguigu.gulimall.ware.service.PurchaseDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,25 +13,23 @@ import java.util.Map;
 
 
 /**
- * 商品库存
- *
+ * 采购需求
  * @author linzongxing
  * @email 973565601@qq.com
- * @date 2021-10-09 00:21:59
+ * @date 2021-12-10 00:34:36
  */
 @RestController
-@RequestMapping("ware/waresku")
-public class WareSkuController {
+@RequestMapping("ware/purchasedetail")
+public class PurchaseDetailController {
     @Autowired
-    private WareSkuService wareSkuService;
+    private PurchaseDetailService purchaseDetailService;
 
     /**
-     * 1、列表查询，携带多条件模糊查询
-     * wareId，skuId
+     * 1、增加条件列表查询
      */
     @RequestMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = wareSkuService.queryPage(params);
+        PageUtils page = purchaseDetailService.queryPage(params);
 
         return R.ok().put("page", page);
     }
@@ -42,17 +40,17 @@ public class WareSkuController {
      */
     @RequestMapping("/info/{id}")
     public R info(@PathVariable("id") Long id){
-		WareSkuEntity wareSku = wareSkuService.getById(id);
+		PurchaseDetailEntity purchaseDetail = purchaseDetailService.getById(id);
 
-        return R.ok().put("wareSku", wareSku);
+        return R.ok().put("purchaseDetail", purchaseDetail);
     }
 
     /**
      * 保存
      */
     @RequestMapping("/save")
-    public R save(@RequestBody WareSkuEntity wareSku){
-		wareSkuService.save(wareSku);
+    public R save(@RequestBody PurchaseDetailEntity purchaseDetail){
+		purchaseDetailService.save(purchaseDetail);
 
         return R.ok();
     }
@@ -61,8 +59,8 @@ public class WareSkuController {
      * 修改
      */
     @RequestMapping("/update")
-    public R update(@RequestBody WareSkuEntity wareSku){
-		wareSkuService.updateById(wareSku);
+    public R update(@RequestBody PurchaseDetailEntity purchaseDetail){
+		purchaseDetailService.updateById(purchaseDetail);
 
         return R.ok();
     }
@@ -72,7 +70,7 @@ public class WareSkuController {
      */
     @RequestMapping("/delete")
     public R delete(@RequestBody Long[] ids){
-		wareSkuService.removeByIds(Arrays.asList(ids));
+		purchaseDetailService.removeByIds(Arrays.asList(ids));
 
         return R.ok();
     }

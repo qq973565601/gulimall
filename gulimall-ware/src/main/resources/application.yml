@@ -19,4 +19,8 @@ mybatis-plus:
       id-type: auto
 server:
   port: 11000
+#打印sql语句
+logging:
+  level:
+    com.atguigu: debug
 
